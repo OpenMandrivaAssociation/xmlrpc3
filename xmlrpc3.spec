@@ -79,7 +79,7 @@ Requires:       ws-commons-util
 %if ! %{gcj_support}
 Buildarch:    noarch
 %endif
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if %{gcj_support}
 BuildRequires:    java-gcj-compat-devel
