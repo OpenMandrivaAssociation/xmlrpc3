@@ -164,6 +164,7 @@ mvn-jpp \
   -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
   -Djava.home=%{_jvmdir}/java/jre \
   -Dmaven2.jpp.depmap.file=%{SOURCE1} \
+  -Dmaven.test.skip=true \
   -Dmaven.test.failure.ignore=true \
   install javadoc:javadoc
 
