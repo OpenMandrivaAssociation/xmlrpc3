@@ -1,4 +1,4 @@
-# Copyright (c) 2000-2005, JPackage Project
+# Copyright (c) 2000-2005, JPackage roject
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 Name:       xmlrpc3
 Version:    3.0
-Release:    %mkrel 1.1.2
+Release:    %mkrel 1.4.1
 Summary:    Java XML-RPC implementation
 License:    Apache Software License
 Group:      Development/Java
@@ -46,9 +46,14 @@ Source1:    %{name}-jpp-depmap.xml
 # The tests pom.xml doesn't include necessary dependencies on junit and
 # servletapi
 Patch0:     %{name}-addjunitandservletapitotestpom.patch
+# Add OSGi MANIFEST information
+Patch1:     %{name}-client-addosgimanifest.patch
+Patch2:     %{name}-common-addosgimanifest.patch
 
-BuildRequires:  dos2unix
-BuildRequires:  maven2 >= 2.0.4
+# https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=239123
+ExcludeArch: ppc64
+
+BuildRequires:  maven2 >= 0:2.0.4
 BuildRequires:  maven2-plugin-resources
 BuildRequires:  maven2-plugin-compiler
 BuildRequires:  maven2-plugin-surefire
@@ -65,7 +70,7 @@ BuildRequires:  jpackage-utils >= 0:1.6
 BuildRequires:  servletapi5
 BuildRequires:  junit
 BuildRequires:  jakarta-commons-httpclient
-BuildRequires:  jakarta-commons-codec >= 1.3
+BuildRequires:  jakarta-commons-codec >= 0:1.3
 BuildRequires:  jsse
 Requires:       jpackage-utils >= 0:1.6
 Requires:       servletapi5
@@ -152,9 +157,15 @@ Requires:   %{name}-server
 %setup -q -n %{mainname}-%{version}
 %patch0
 cp %{SOURCE1} .
+pushd client
+%patch1
+popd
+pushd common
+%patch2
+popd
 
 %build
-dos2unix LICENSE.txt
+%{__perl} -pi -e 's/\r$//g' LICENSE.txt
 export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
 mkdir -p $MAVEN_REPO_LOCAL
 # The java.home is due to java-gcj and libgcj weirdness on 64-bit
@@ -164,7 +175,6 @@ mvn-jpp \
   -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
   -Djava.home=%{_jvmdir}/java/jre \
   -Dmaven2.jpp.depmap.file=%{SOURCE1} \
-  -Dmaven.test.skip=true \
   -Dmaven.test.failure.ignore=true \
   install javadoc:javadoc
 
@@ -193,6 +203,7 @@ install -m 644 common/target/%{mainname}-common-%{version}-sources.jar \
 # javadoc
 install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
@@ -219,7 +230,8 @@ fi
 
 %files javadoc
 %defattr(-,root,root,-)
-%{_javadocdir}/*
+%{_javadocdir}/%{name}
+%{_javadocdir}/%{name}-%{version}
 
 %files common
 %defattr(-,root,root,-)
