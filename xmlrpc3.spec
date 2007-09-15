@@ -35,7 +35,7 @@
 
 Name:       xmlrpc3
 Version:    3.0
-Release:    %mkrel 1.4.1
+Release:    %mkrel 1.4.2
 Summary:    Java XML-RPC implementation
 License:    Apache Software License
 Group:      Development/Java
