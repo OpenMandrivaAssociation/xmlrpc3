@@ -35,7 +35,7 @@
 
 Name:       xmlrpc3
 Version:    3.0
-Release:    %mkrel 1.4.2
+Release:    %mkrel 1.4.3
 Summary:    Java XML-RPC implementation
 License:    Apache Software License
 Group:      Development/Java
@@ -88,8 +88,6 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if %{gcj_support}
 BuildRequires:    java-gcj-compat-devel
-Requires(post):   java-gcj-compat
-Requires(postun): java-gcj-compat
 %endif
 
 %description
