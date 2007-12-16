@@ -35,7 +35,7 @@
 
 Name:       xmlrpc3
 Version:    3.0
-Release:    %mkrel 1.4.3
+Release:    %mkrel 1.4.4
 Summary:    Java XML-RPC implementation
 License:    Apache Software License
 Group:      Development/Java
@@ -66,7 +66,7 @@ BuildRequires:  maven2-plugin-release
 BuildRequires:  maven2-plugin-source
 BuildRequires:  ws-jaxme
 BuildRequires:  ws-commons-util
-BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  servletapi5
 BuildRequires:  junit
 BuildRequires:  jakarta-commons-httpclient
