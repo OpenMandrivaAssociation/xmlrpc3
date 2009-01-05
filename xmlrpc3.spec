@@ -41,7 +41,7 @@
 
 Name:           xmlrpc3
 Version:        3.1
-Release:        1%{?dist}
+Release:        %mkrel 1
 Epoch:          0
 Summary:        Java XML-RPC implementation
 License:        ASL 2.0
