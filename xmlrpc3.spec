@@ -41,7 +41,7 @@
 
 Name:           xmlrpc3
 Version:        3.1
-Release:        %mkrel 1
+Release:        %mkrel 2
 Epoch:          0
 Summary:        Java XML-RPC implementation
 License:        ASL 2.0
@@ -266,11 +266,11 @@ ln -sf ${jar} ${jar/-%{version}/}; done)
 (cd $RPM_BUILD_ROOT%{_javadir}/%{name} && for jar in *-%{version}*; do \
 ln -sf ${jar} ${jar/-%{version}/}; done)
 
-%add_to_maven_depmap org.apache.xmlrpc3 xmlrpc %{version} JPP %{name}
-%add_to_maven_depmap org.apache.xmlrpc3 xmlrpc-client %{version} JPP/%{name} client
-%add_to_maven_depmap org.apache.xmlrpc3 xmlrpc-common %{version} JPP/%{name} common
-%add_to_maven_depmap org.apache.xmlrpc3 xmlrpc-server %{version} JPP/%{name} server
-%add_to_maven_depmap org.apache.xmlrpc3 xmlrpc-tests %{version} JPP/%{name} tests
+%add_to_maven_depmap org.apache.xmlrpc xmlrpc %{version} JPP %{name}
+%add_to_maven_depmap org.apache.xmlrpc xmlrpc-client %{version} JPP/%{name} client
+%add_to_maven_depmap org.apache.xmlrpc xmlrpc-common %{version} JPP/%{name} common
+%add_to_maven_depmap org.apache.xmlrpc xmlrpc-server %{version} JPP/%{name} server
+%add_to_maven_depmap org.apache.xmlrpc xmlrpc-tests %{version} JPP/%{name} tests
 
 # poms
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
