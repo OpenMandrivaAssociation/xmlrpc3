@@ -73,6 +73,7 @@ BuildRequires:  ws-commons-util
 BuildRequires:  ws-jaxme
 BuildRequires:  xml-commons-jaxp-1.3-apis
 BuildRequires:  java-rpmbuild
+BuildRequires:  zip
 %if %with maven
 BuildRequires:  maven2 >= 2.0.4-10jpp
 BuildRequires:  maven2-plugin-assembly
