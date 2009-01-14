@@ -41,7 +41,7 @@
 
 Name:           xmlrpc3
 Version:        3.1
-Release:        %mkrel 2
+Release:        %mkrel 3
 Epoch:          0
 Summary:        Java XML-RPC implementation
 License:        ASL 2.0
@@ -55,11 +55,13 @@ Source4:        xmlrpc-client-build.xml
 Source5:        xmlrpc-common-build.xml
 Source6:        xmlrpc-server-build.xml
 Source7:        xmlrpc-tests-build.xml
+Source8:        MANIFEST.MF-client
+Source9:        MANIFEST.MF-common
 Patch0:         xmlrpc-pom_xml.patch
 Patch1:         xmlrpc-tests-pom_xml.patch
 Patch2:         xmlrpc-site_xml.patch
-Patch3:         xmlrpc3-client-addosgimanifest2.patch
-Patch4:         xmlrpc3-common-addosgimanifest2.patch
+Patch3:         xmlrpc3-client-addosgimanifest3.patch
+Patch4:         xmlrpc3-common-addosgimanifest3.patch
 BuildRequires:  jpackage-utils >= 0:1.7.2
 BuildRequires:  ant
 BuildRequires:  junit
@@ -202,21 +204,21 @@ mvn-jpp \
 
 %else
 pushd common
-export CLASSPATH=$(build-classpath ws-commons-java5 ws-commons-util jaxme/jaxmeapi xml-commons-jaxp-1.3-apis)
+export CLASSPATH=$(build-classpath ws-commons-util jaxme/jaxmeapi xml-commons-jaxp-1.3-apis)
 export OPT_JAR_LIST=:
-ant -Dbuild.sysclasspath=only jar javadoc
+%ant -Dbuild.sysclasspath=only jar javadoc
 popd
 
 pushd client
-export CLASSPATH=$(build-classpath ws-commons-java5 ws-commons-util commons-httpclient xml-commons-jaxp-1.3-apis)
+export CLASSPATH=$(build-classpath ws-commons-util commons-httpclient xml-commons-jaxp-1.3-apis)
 CLASSPATH=$CLASSPATH:../common/target/%{oname}-common-%{version}.jar
-ant -Dbuild.sysclasspath=only jar javadoc
+%ant -Dbuild.sysclasspath=only jar javadoc
 popd
 
 pushd server
-export CLASSPATH=$(build-classpath commons-logging ws-commons-java5 ws-commons-util servletapi5 xml-commons-jaxp-1.3-apis)
+export CLASSPATH=$(build-classpath commons-logging ws-commons-util servletapi5 xml-commons-jaxp-1.3-apis)
 CLASSPATH=$CLASSPATH:../common/target/%{oname}-common-%{version}.jar
-ant -Dbuild.sysclasspath=only jar javadoc
+%ant -Dbuild.sysclasspath=only jar javadoc
 popd
 
 pushd tests
@@ -229,11 +231,19 @@ ant -Dbuild.sysclasspath=only jar javadoc
 popd
 
 %endif
+
+# inject OSGi manifests
+mkdir META-INF
+cp -f %{SOURCE8} META-INF/MANIFEST.MF
+zip -u client/target/%{oname}-client-%{version}.jar META-INF/MANIFEST.MF
+cp -f %{SOURCE9} META-INF/MANIFEST.MF
+zip -u common/target/%{oname}-common-%{version}.jar META-INF/MANIFEST.MF
+
 mkdir -p temp
 pushd temp
-%{jar} xf ../server/target/%{oname}-server-%{version}.jar
-%{jar} xf ../client/target/%{oname}-client-%{version}.jar
-%{jar} xf ../common/target/%{oname}-common-%{version}.jar
+%{jar} xfv ../server/target/%{oname}-server-%{version}.jar
+%{jar} xfv ../client/target/%{oname}-client-%{version}.jar
+%{jar} xfv ../common/target/%{oname}-common-%{version}.jar
 %{__sed} -i -e "s|-common||g" META-INF/MANIFEST.MF
 %{jar} cmf META-INF/MANIFEST.MF ../%{oname}-%{version}.jar *
 popd
