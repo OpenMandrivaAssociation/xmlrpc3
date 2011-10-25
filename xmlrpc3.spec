@@ -27,92 +27,48 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-%define with()          %{expand:%%{?with_%{1}:1}%%{!?with_%{1}:0}}
-%define without()       %{expand:%%{?with_%{1}:0}%%{!?with_%{1}:1}}
-%define bcond_with()    %{expand:%%{?_with_%{1}:%%global with_%{1} 1}}
-%define bcond_without() %{expand:%%{!?_without_%{1}:%%global with_%{1} 1}}
 
-%bcond_with             maven
+%global mainname xmlrpc
 
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
+Name:       xmlrpc3
+Version:    3.1.3
+Release:    5
+Summary:    Java XML-RPC implementation
+License:    ASL 2.0
+Group:      Development/Java
+URL:        http://ws.apache.org/xmlrpc/
+Source0:    http://www.apache.org/dist//ws/xmlrpc/sources/apache-xmlrpc-%{version}-src.tar.bz2
+Source1:    %{name}-jpp-depmap.xml
+# FIXME:  file this upstream
+# The tests pom.xml doesn't include necessary dependencies on junit and
+# servletapi
+Patch0:     %{name}-addjunitandservletapitotestpom.patch
+# Add OSGi MANIFEST information
+Patch1:     %{name}-client-addosgimanifest.patch
+Patch2:     %{name}-common-addosgimanifest.patch
 
-%define section free
-%define oname xmlrpc
-
-Name:           xmlrpc3
-Version:        3.1
-Release:        %mkrel 3
-Epoch:          0
-Summary:        Java XML-RPC implementation
-License:        ASL 2.0
-Group:          Development/Java
-URL:            http://ws.apache.org/xmlrpc/
-Source0:        http://www.apache.org/dist/ws/xmlrpc/sources/xmlrpc-3.1-src.tar.gz
-Source1:        xmlrpc-settings.xml
-Source2:        xmlrpc-jpp-depmap.xml
-Source3:        xmlrpc-build.xml
-Source4:        xmlrpc-client-build.xml
-Source5:        xmlrpc-common-build.xml
-Source6:        xmlrpc-server-build.xml
-Source7:        xmlrpc-tests-build.xml
-Source8:        MANIFEST.MF-client
-Source9:        MANIFEST.MF-common
-Patch0:         xmlrpc-pom_xml.patch
-Patch1:         xmlrpc-tests-pom_xml.patch
-Patch2:         xmlrpc-site_xml.patch
-Patch3:         xmlrpc3-client-addosgimanifest3.patch
-Patch4:         xmlrpc3-common-addosgimanifest3.patch
-BuildRequires:  jpackage-utils >= 0:1.7.2
-BuildRequires:  ant
-BuildRequires:  junit
-BuildRequires:  jakarta-commons-codec
-BuildRequires:  jakarta-commons-httpclient
-BuildRequires:  jakarta-commons-logging
-BuildRequires:  servletapi5
-BuildRequires:  ws-commons-util
+BuildRequires:  maven2 >= 2.0.4
+BuildRequires:  maven-resources-plugin
+BuildRequires:  maven-compiler-plugin
+BuildRequires:  maven-surefire-plugin
+BuildRequires:  maven-jar-plugin
+BuildRequires:  maven-install-plugin
+BuildRequires:  maven-javadoc-plugin
+BuildRequires:  maven-eclipse-plugin
+BuildRequires:  maven-assembly-plugin
+BuildRequires:  maven-source-plugin
+BuildRequires:  maven-site-plugin
 BuildRequires:  ws-jaxme
-BuildRequires:  xml-commons-jaxp-1.3-apis
-BuildRequires:  java-rpmbuild
-BuildRequires:  zip
-%if %with maven
-BuildRequires:  maven2 >= 2.0.4-10jpp
-BuildRequires:  maven2-plugin-assembly
-BuildRequires:  maven2-plugin-compiler
-BuildRequires:  maven2-plugin-eclipse
-BuildRequires:  maven2-plugin-install
-BuildRequires:  maven2-plugin-jar
-BuildRequires:  maven2-plugin-javadoc
-BuildRequires:  maven2-plugin-resources
-BuildRequires:  maven2-plugin-source
-BuildRequires:  maven2-plugin-surefire
-BuildRequires:  maven-release
-%endif
-Requires:       jakarta-commons-codec
-Requires:       jakarta-commons-httpclient
-Requires:       jakarta-commons-logging
-Requires:       servletapi5
-Requires:       ws-commons-util
-Requires:       ws-jaxme
-Requires:       xml-commons-jaxp-1.3-apis
-Requires(post): jpackage-utils >= 0:1.7.2
-Requires(postun): jpackage-utils >= 0:1.7.2
-%if %{gcj_support}
-BuildRequires:    java-gcj-compat-devel
-%else
-Buildarch:      noarch
-%endif
+BuildRequires:  ws-commons-util
+BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  servlet25
+BuildRequires:	tomcat6
+BuildRequires:  junit
+BuildRequires:  jakarta-commons-httpclient
+BuildRequires:  apache-commons-logging
+BuildRequires:  jsse
 
-# https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=239123
-ExcludeArch: ppc64
-
-%if ! %{gcj_support}
-Buildarch:    noarch
-%endif
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root
-
-%if %{gcj_support}
-BuildRequires:    java-gcj-compat-devel
-%endif
+BuildArch:    noarch
 
 %description
 Apache XML-RPC is a Java implementation of XML-RPC, a popular protocol
@@ -131,6 +87,13 @@ Javadoc for %{name}.
 %package common
 Summary:    Common classes for XML-RPC client and server implementations
 Group:      Development/Java
+Obsoletes:  %{name}-common-devel <= %{version}
+Requires:   ws-jaxme
+Requires:   ws-commons-util
+Requires:   jpackage-utils >= 0:1.6
+Requires:   apache-commons-logging
+Requires(post): jpackage-utils
+Requires(postun): jpackage-utils
 
 %description common
 %{summary}.
@@ -139,237 +102,107 @@ Group:      Development/Java
 Summary:    XML-RPC client implementation
 Group:      Development/Java
 Requires:   %{name}-common
+Requires:   jakarta-commons-httpclient
+Obsoletes:  %{name}-client-devel <= %{version}
 
 %description client
 %{summary}.
 
 %package server
-Summary:    Javadoc for %{name}
+Summary:    XML-RPC server implementation
 Group:      Development/Java
-Requires:   %{name}-common
+Requires:   %{name}-client
+Requires:   junit
+Requires:   servlet25
+Obsoletes:  %{name}-server-devel <= %{version}
 
 %description server
 %{summary}.
 
 %prep
-%setup -q -n xmlrpc-%{version}
-cp -p %{SOURCE1} settings.xml
-cp -p %{SOURCE3} build.xml
-cp -p %{SOURCE4} client/build.xml
-cp -p %{SOURCE5} common/build.xml
-cp -p %{SOURCE6} server/build.xml
-cp -p %{SOURCE7} tests/build.xml
-%if 0
-%patch0 -p0
-%patch1 -p0
-%patch2 -p0
-%endif
+%setup -q -n apache-%{mainname}-%{version}-src
+pushd server
+%patch0 -b .sav
+popd
 pushd client
-%patch3 -p1
+%patch1 -b .sav
 popd
 pushd common
-%patch4 -p1
+%patch2 -b .sav
 popd
 
-perl -pi -e 's/\r$//g' LICENSE.txt
+sed -i 's/\r//' LICENSE.txt
 
 %build
-%if %with maven
-sed -i -e "s|<url>__JPP_URL_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__JAVADIR_PLACEHOLDER__</url>|<url>file://`pwd`/external_repo</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENREPO_DIR_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/maven2/plugins</url>|g" settings.xml
-sed -i -e "s|<url>__ECLIPSEDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/eclipse/plugins</url>|g" settings.xml
-
 export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
 mkdir -p $MAVEN_REPO_LOCAL
-
-mkdir external_repo
-ln -s %{_javadir} external_repo/JPP
-
-mkdir common/src/site
-cp src/site/site.xml common/src/site
-mkdir client/src/site
-cp src/site/site.xml client/src/site
-mkdir server/src/site
-cp src/site/site.xml server/src/site
-mkdir tests/src/site
-cp src/site/site.xml tests/src/site
+# ignore test failure because server part needs network
 mvn-jpp \
-        -e \
-        -s $(pwd)/settings.xml \
-        -Dmaven2.jpp.mode=true \
-        -Dmaven2.jpp.depmap.file=%{SOURCE2} \
-        -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
-        install javadoc:javadoc site:site
-
-%else
-pushd common
-export CLASSPATH=$(build-classpath ws-commons-util jaxme/jaxmeapi xml-commons-jaxp-1.3-apis)
-export OPT_JAR_LIST=:
-%ant -Dbuild.sysclasspath=only jar javadoc
-popd
-
-pushd client
-export CLASSPATH=$(build-classpath ws-commons-util commons-httpclient xml-commons-jaxp-1.3-apis)
-CLASSPATH=$CLASSPATH:../common/target/%{oname}-common-%{version}.jar
-%ant -Dbuild.sysclasspath=only jar javadoc
-popd
-
-pushd server
-export CLASSPATH=$(build-classpath commons-logging ws-commons-util servletapi5 xml-commons-jaxp-1.3-apis)
-CLASSPATH=$CLASSPATH:../common/target/%{oname}-common-%{version}.jar
-%ant -Dbuild.sysclasspath=only jar javadoc
-popd
-
-pushd tests
-export CLASSPATH=$(build-classpath commons-logging commons-codec commons-httpclient ws-commons-util servletapi5 xml-commons-jaxp-1.3-apis)
-CLASSPATH=$CLASSPATH:../common/target/%{oname}-common-%{version}.jar
-CLASSPATH=$CLASSPATH:../client/target/%{oname}-client-%{version}.jar
-CLASSPATH=$CLASSPATH:../server/target/%{oname}-server-%{version}.jar
-CLASSPATH=$CLASSPATH:target/test-classes
-ant -Dbuild.sysclasspath=only jar javadoc
-popd
-
-%endif
-
-# inject OSGi manifests
-mkdir META-INF
-cp -f %{SOURCE8} META-INF/MANIFEST.MF
-zip -u client/target/%{oname}-client-%{version}.jar META-INF/MANIFEST.MF
-cp -f %{SOURCE9} META-INF/MANIFEST.MF
-zip -u common/target/%{oname}-common-%{version}.jar META-INF/MANIFEST.MF
-
-mkdir -p temp
-pushd temp
-%{jar} xfv ../server/target/%{oname}-server-%{version}.jar
-%{jar} xfv ../client/target/%{oname}-client-%{version}.jar
-%{jar} xfv ../common/target/%{oname}-common-%{version}.jar
-%{__sed} -i -e "s|-common||g" META-INF/MANIFEST.MF
-%{jar} cmf META-INF/MANIFEST.MF ../%{oname}-%{version}.jar *
-popd
+  -e \
+  -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
+  -Dmaven2.jpp.depmap.file=%{SOURCE1} \
+  -Dmaven.test.failure.ignore=true \
+  install javadoc:aggregate
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 # jars
-#install -d -m 755 $RPM_BUILD_ROOT%{_javadir}/%{name}
-#install -m 644 %{oname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-#install -m 644 common/target/%{oname}-common-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}/common-%{version}.jar
-#install -m 644 client/target/%{oname}-client-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}/client-%{version}.jar
-#install -m 644 server/target/%{oname}-server-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}/server-%{version}.jar
-#install -m 644 tests/target/%{oname}-tests-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}/tests-%{version}.jar
-##############################################################################################
-# jars
 install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -m 644 %{oname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-install -m 644 client/target/%{oname}-client-%{version}.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-client-%{version}.jar
-install -m 644 server/target/%{oname}-server-%{version}.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-server-%{version}.jar
-install -m 644 common/target/%{oname}-common-%{version}.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-common-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}*; do \
-ln -sf ${jar} ${jar/-%{version}/}; done)
+install -m 644 client/target/%{mainname}-client-%{version}.jar \
+  $RPM_BUILD_ROOT%{_javadir}/%{name}-client.jar
+install -m 644 server/target/%{mainname}-server-%{version}.jar \
+  $RPM_BUILD_ROOT%{_javadir}/%{name}-server.jar
+install -m 644 common/target/%{mainname}-common-%{version}.jar \
+  $RPM_BUILD_ROOT%{_javadir}/%{name}-common.jar
 
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}*; do \
-ln -sf ${jar} ${jar/-%{version}/}; done)
-(cd $RPM_BUILD_ROOT%{_javadir}/%{name} && for jar in *-%{version}*; do \
-ln -sf ${jar} ${jar/-%{version}/}; done)
+# install maven pom files
+install -Dm 644 pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
+install -Dm 644 common/pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}-common.pom
+install -Dm 644 client/pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}-client.pom
+install -Dm 644 server/pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}-server.pom
 
-%add_to_maven_depmap org.apache.xmlrpc xmlrpc %{version} JPP %{name}
-%add_to_maven_depmap org.apache.xmlrpc xmlrpc-client %{version} JPP/%{name} client
-%add_to_maven_depmap org.apache.xmlrpc xmlrpc-common %{version} JPP/%{name} common
-%add_to_maven_depmap org.apache.xmlrpc xmlrpc-server %{version} JPP/%{name} server
-%add_to_maven_depmap org.apache.xmlrpc xmlrpc-tests %{version} JPP/%{name} tests
-
-# poms
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
-install -m 644 pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP-%{name}.pom
-install -m 644 client/pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.%{name}-client.pom
-install -m 644 common/pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.%{name}-common.pom
-install -m 644 server/pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.%{name}-server.pom
-install -m 644 tests/pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.%{name}-tests.pom
+# ... and maven depmaps
+%add_to_maven_depmap org.apache.xmlrpc %{mainname} %{version} JPP %{name}
+%add_to_maven_depmap org.apache.xmlrpc %{mainname}-common %{version} JPP %{name}-common
+%add_to_maven_depmap org.apache.xmlrpc %{mainname}-client %{version} JPP %{name}-client
+%add_to_maven_depmap org.apache.xmlrpc %{mainname}-server %{version} JPP %{name}-server
 
 # javadoc
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-%if %with maven
-cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-%else
-for m in common client server tests; do
-    install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}/$m
-    cp -pr $m/target/site/apidocs/* \
-                      $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}/$m
-done
-%endif
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-%if %with maven
-install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-# FIXME: (dwalluck): breaks -bi --short-circuit
-rm -rf target/site/apidocs
-cp -pr target/site $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-%endif
-
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post
+%post common
 %update_maven_depmap
-%if %{gcj_support}
-if [ -x %{_bindir}/rebuild-gcj-db ]
-then
-  %{_bindir}/rebuild-gcj-db
-fi
-%endif
 
-%postun
+%postun common
 %update_maven_depmap
-%if %{gcj_support}
-if [ -x %{_bindir}/rebuild-gcj-db ]
-then
-  %{_bindir}/rebuild-gcj-db
-fi
-%endif
+
+%pre javadoc
+# workaround rpm bug, can be removed in F-17
+[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
+rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
 
 %files javadoc
 %defattr(-,root,root,-)
-%{_javadocdir}/%{name}
-%{_javadocdir}/%{name}-%{version}
+%doc LICENSE.txt
+%{_javadocdir}/*
 
 %files common
 %defattr(-,root,root,-)
 %doc LICENSE.txt
-%{_datadir}/maven2/poms/*
-%{_mavendepmapfragdir}/*
+%{_mavenpomdir}/JPP-%{name}.pom
+%{_mavenpomdir}/JPP-%{name}-common.pom
+%{_mavendepmapfragdir}/%{name}
 %{_javadir}/%{name}-common.jar
-%{_javadir}/%{name}-common-%{version}.jar
-%{_javadir}/%{name}.jar
-%if %{gcj_support}
-%{_libdir}/gcj/%{name}/%{name}-common*
-%endif
 
 %files client
 %defattr(-,root,root,-)
+%{_mavenpomdir}/JPP-%{name}-client.pom
 %{_javadir}/%{name}-client.jar
-%{_javadir}/%{name}-client-%{version}.jar
-%if %{gcj_support}
-%{_libdir}/gcj/%{name}/%{name}-client*
-%endif
 
 %files server
 %defattr(-,root,root,-)
+%{_mavenpomdir}/JPP-%{name}-server.pom
 %{_javadir}/%{name}-server.jar
-%{_javadir}/%{name}-server-%{version}.jar
-%if %{gcj_support}
-%{_libdir}/gcj/%{name}/%{name}-server*
-%endif
+
