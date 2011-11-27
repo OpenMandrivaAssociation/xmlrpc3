@@ -32,7 +32,7 @@
 
 Name:       xmlrpc3
 Version:    3.1.3
-Release:    5
+Release:    7
 Summary:    Java XML-RPC implementation
 License:    ASL 2.0
 Group:      Development/Java
