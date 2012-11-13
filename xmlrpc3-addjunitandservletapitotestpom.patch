@@ -1,0 +1,13 @@
+--- pom.xml.sav	2010-09-29 09:41:00.044633260 +0300
++++ pom.xml	2010-09-29 09:42:19.943607330 +0300
+@@ -88,5 +88,10 @@
+       <artifactId>commons-httpclient</artifactId>
+       <scope>test</scope>
+     </dependency>
++    <dependency>
++      <groupId>junit</groupId>
++      <artifactId>junit</artifactId>
++      <scope>test</scope>
++    </dependency>
+   </dependencies>
+ </project>
