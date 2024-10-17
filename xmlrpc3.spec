@@ -36,7 +36,7 @@ Release:    7
 Summary:    Java XML-RPC implementation
 License:    ASL 2.0
 Group:      Development/Java
-URL:        http://ws.apache.org/xmlrpc/
+URL:        https://ws.apache.org/xmlrpc/
 Source0:    http://www.apache.org/dist//ws/xmlrpc/sources/apache-xmlrpc-%{version}-src.tar.bz2
 Source1:    %{name}-jpp-depmap.xml
 # FIXME:  file this upstream
